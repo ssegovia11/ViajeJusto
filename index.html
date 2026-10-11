@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Viaje Justo</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: #0f172a; font-family: Arial, Helvetica, sans-serif; padding: 16px; }
+  .card { background: #fff; border-radius: 18px; padding: 32px 28px; max-width: 420px; width: 100%; text-align: center; }
+  .luces span { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin: 0 3px; }
+  h1 { color: #0f172a; font-size: 22px; margin: 16px 0 8px; }
+  p { color: #475569; font-size: 15px; line-height: 22px; margin: 0; }
+  .ok { color: #16a34a; } .error { color: #dc2626; }
+  form { display: none; margin-top: 20px; text-align: left; }
+  input { width: 100%; font-size: 16px; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; margin-top: 10px; }
+  button { width: 100%; margin-top: 16px; background: #16a34a; color: #fff; border: 0; border-radius: 12px;
+           font-size: 16px; font-weight: bold; padding: 14px; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  #msg { margin-top: 12px; font-size: 14px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="luces"><span style="background:#22c55e"></span><span style="background:#f59e0b"></span><span style="background:#ef4444"></span></div>
+    <h1 id="titulo">Viaje Justo</h1>
+    <p id="texto">Sabé si el viaje te conviene antes de aceptarlo.</p>
+    <form id="form">
+      <input id="p1" type="password" placeholder="Contraseña nueva" autocomplete="new-password" minlength="6" required>
+      <input id="p2" type="password" placeholder="Repetila" autocomplete="new-password" minlength="6" required>
+      <button id="btn" type="submit">Guardar contraseña</button>
+      <div id="msg"></div>
+    </form>
+  </div>
+<script>
+  // Datos públicos de Supabase (los mismos de gradle.properties). Nunca pongas la secret ni la service_role.
+  var SUPABASE_URL = "https://rbolnjggryonbmtjaceo.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJib2xuamdncnlvbmJtdGphY2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAyNzIsImV4cCI6MjEwNzIzNjI3Mn0.HgdX5sqIP9e9RYSJNSL7AWsmwqlwrCTQUY8lDrSECqc";
+
+  // Supabase vuelve con el resultado en el hash (#access_token=...&type=signup) o con #error=...
+  var p = new URLSearchParams((location.hash || "").replace(/^#/, "") || location.search.replace(/^\?/, ""));
+  var t = document.getElementById("titulo"), x = document.getElementById("texto");
+  if (p.get("error") || p.get("error_code")) {
+    t.textContent = "El link no es válido"; t.className = "error";
+    x.textContent = (p.get("error_code") === "otp_expired")
+      ? "El link venció o ya fue usado. Si ya confirmaste, ingresá directamente en la app."
+      : "Probá registrarte de nuevo desde la app.";
+  } else if (p.get("type") === "recovery") {
+    t.textContent = "Elegí tu contraseña nueva";
+    x.textContent = "Mínimo 6 caracteres.";
+    var token = p.get("access_token"), f = document.getElementById("form"), msg = document.getElementById("msg");
+    f.style.display = "block";
+    f.onsubmit = function (e) {
+      e.preventDefault();
+      var a = document.getElementById("p1").value, b = document.getElementById("p2").value;
+      if (a.length < 6) { msg.className = "error"; msg.textContent = "Tiene que tener al menos 6 caracteres"; return; }
+      if (a !== b) { msg.className = "error"; msg.textContent = "Las contraseñas no coinciden"; return; }
+      var btn = document.getElementById("btn"); btn.disabled = true; msg.textContent = "";
+      fetch(SUPABASE_URL + "/auth/v1/user", {
+        method: "PUT",
+        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+        body: JSON.stringify({ password: a })
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          if (res.ok) {
+            f.style.display = "none"; t.className = "ok"; t.textContent = "¡Contraseña cambiada!";
+            x.textContent = "Ya podés volver a Viaje Justo e ingresar con la contraseña nueva.";
+          } else {
+            btn.disabled = false; msg.className = "error";
+            var m = (res.j.msg || res.j.message || res.j.error_description || "").toLowerCase();
+            msg.textContent = m.indexOf("different") >= 0 ? "Tiene que ser distinta a la anterior"
+              : m.indexOf("expired") >= 0 || m.indexOf("jwt") >= 0 ? "El link venció. Pedí otro desde la app"
+              : "No se pudo cambiar. Probá de nuevo";
+          }
+        }).catch(function () { btn.disabled = false; msg.className = "error"; msg.textContent = "Sin conexión. Probá de nuevo"; });
+    };
+  } else if (p.get("access_token") || p.get("type") === "signup") {
+    t.textContent = "¡Cuenta confirmada!"; t.className = "ok";
+    x.textContent = "Ya podés volver a Viaje Justo e ingresar con tu email y contraseña.";
+  }
+  // Por seguridad, borramos el token de la barra de direcciones
+  if (location.hash) history.replaceState(null, "", location.pathname);
+</script>
+</body>
+</html>
