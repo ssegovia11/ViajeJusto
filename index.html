@@ -1,4 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C111C">
 <title>Viaje Justo</title>
 <meta name="description" content="Sabé si el viaje te conviene antes de aceptarlo. Para choferes de Didi, Uber, inDrive y Cabify.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,7 +148,13 @@ details p{color:var(--suave);padding-bottom:18px;max-width:60ch}
 .final{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px}
 .final h2{max-width:18em}
 .final .pill{background:var(--verde);color:#04230F}
-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding-block:24px 40px;color:var(--tenue);font-size:14px;border-top:1px solid var(--borde)}
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 20px;padding-block:24px 40px;color:var(--tenue);font-size:14px;border-top:1px solid var(--borde)}
+.legales{display:flex;flex-wrap:wrap;gap:8px 18px}
+.legales a{color:var(--suave)}
+.legales a.arrep{color:var(--texto);font-weight:700}
+.acepto{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--suave);line-height:1.45;cursor:pointer}
+.acepto input{width:20px;height:20px;margin-top:1px;accent-color:#22C55E;flex:none}
+.acepto a{color:var(--texto)}
 
 /* compra */
 dialog{border:1px solid var(--borde);border-radius:20px;background:var(--fondo2);color:var(--texto);padding:0;width:min(460px,calc(100% - 32px))}
@@ -190,7 +201,8 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
   .campo:first-child{grid-column:1/-1}
 }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header class="top">
     <a class="marca" href="#inicio"><span class="mini" data-luz="verde" aria-hidden="true"><i class="l-r"></i><i class="l-a"></i><i class="l-v"></i></span>Viaje Justo</a>
@@ -334,8 +346,8 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
   </main>
 
   <footer>
-    <span>Viaje Justo · hecho en Argentina</span>
-    <span>No tenemos relación con Didi, Uber, inDrive ni Cabify.</span>
+    <span>Viaje Justo · hecho en Argentina · No tenemos relación con Didi, Uber, inDrive ni Cabify.</span>
+    <nav class="legales"><a href="terminos.html">Términos y condiciones</a><a href="privacidad.html">Privacidad</a><a href="arrepentimiento.html" class="arrep">Botón de arrepentimiento</a></nav>
   </footer>
 </div>
 
@@ -347,6 +359,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
     <details id="detRenovar"><summary>Ya tengo clave y quiero renovarla</summary>
       <div class="cc"><label for="renovar">Tu clave actual</label><input id="renovar" placeholder="VJ-XXXX-XXXX-XXXX" autocapitalize="characters" maxlength="24"></div>
     </details>
+    <label class="acepto"><input type="checkbox" id="acepto"> <span>Leí y acepto los <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
     <p class="err" id="errCompra" role="alert"></p>
     <button class="btn-mp" id="btnPagar" type="submit">Pagar con Mercado Pago</button>
     <p class="chico">Te llevamos a Mercado Pago. Cuando se apruebe el pago, volvés acá y ves tu clave.</p>
@@ -357,7 +370,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
 <script>
   // ====== CONFIGURACIÓN ======
   const FUNCIONES = "https://rbolnjggryonbmtjaceo.supabase.co/functions/v1";   // tu Project URL + /functions/v1
-  const APK_URL   = "https://github.com/ssegovia11/ViajeJusto/releases/tag/v1";   // link de descarga del APK (ej: GitHub Releases o Google Drive)
+  const APK_URL   = "";   // link de descarga del APK (ej: GitHub Releases o Google Drive)
   const WHATSAPP  = "5492975012375";   // soporte, con código de país sin + (ej: 5492974123456)
   // ============================
 
@@ -394,6 +407,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
     const email = document.getElementById("email").value.trim();
     const renovar = document.getElementById("detRenovar").open ? document.getElementById("renovar").value.trim().toUpperCase() : "";
     if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Revisá el email."; return; }
+    if (!document.getElementById("acepto").checked) { err.textContent = "Para seguir, aceptá los términos y condiciones."; return; }
     if (renovar && !/^VJ-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(renovar)) { err.textContent = "La clave tiene el formato VJ-XXXX-XXXX-XXXX."; return; }
     btn.disabled = true; btn.textContent = "Abriendo Mercado Pago…"; err.textContent = "";
     try {
@@ -490,5 +504,5 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
   $("calc").addEventListener("submit", e => e.preventDefault());
   calcular();
 </script>
-
-</body></html>
+</body>
+</html>
