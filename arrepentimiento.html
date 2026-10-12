@@ -45,7 +45,9 @@ footer a{color:var(--suave)}
 <h1>Botón de arrepentimiento</h1>
 <p class="fecha">Ley 24.240, art. 34 · Resolución 424/2020</p>
 
-<p>Si compraste un plan hace <b>10 días o menos</b>, podés arrepentirte sin dar explicaciones y sin costo. Te devolvemos el dinero por el mismo medio de pago y desactivamos la clave.</p>
+<p>Podés arrepentirte de la compra si se cumplen <b>las dos</b> condiciones:</p>
+<ul><li>Compraste hace <b>10 días o menos</b>.</li><li><b>No activaste</b> la clave en ningún celular.</li></ul>
+<p>Si la clave ya se activó, no corresponde la devolución, porque el programa ya fue entregado y usado (art. 1116, inc. b, Código Civil y Comercial). Más info en los <a href="terminos.html">términos y condiciones</a>.</p>
 
 <form class="form" id="f" autocomplete="on">
   <div><label for="email">Email que usaste para comprar</label><input id="email" type="email" required placeholder="nombre@gmail.com"></div>
@@ -59,9 +61,9 @@ footer a{color:var(--suave)}
 <div class="caja" id="ok" hidden>
   <p>Tu código de pedido es:</p>
   <p class="codigo" id="cod"></p>
-  <p>Guardalo. Para completar el pedido, mandanos el mensaje que se abre en WhatsApp. Si no se abrió, escribinos al <a href="https://wa.me/5492975012375">+54 9 297 501-2375</a> o a [EMAIL DE CONTACTO] con este código.</p>
-  <p><a class="btn" id="wa" href="#" target="_blank" rel="noopener">Abrir WhatsApp</a></p>
-  <p>Te respondemos en menos de 24 horas y hacemos la devolución en cuanto confirmamos la compra.</p>
+  <p>Guardalo. Para completar el pedido, mandanos el email que se abre con este código. Si no se abrió, escribinos a <b>[TU GMAIL]</b> con el código y tus datos.</p>
+  <p><a class="btn" id="wa" href="#">Abrir el email</a></p>
+  <p>Te respondemos en menos de 24 horas. Si la clave no se activó, hacemos la devolución por el mismo medio de pago.</p>
 </div>
 
 <footer><a href="terminos.html">Términos y condiciones</a><a href="privacidad.html">Privacidad</a><a href="arrepentimiento.html">Botón de arrepentimiento</a></footer>
@@ -78,12 +80,12 @@ document.getElementById("f").addEventListener("submit", e => {
   const d = new Date(), pad = n => String(n).padStart(2, "0");
   const cod = "ARR-" + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + "-" + Math.random().toString(36).slice(2,7).toUpperCase();
   const msj = "Hola! Quiero ejercer el derecho de arrepentimiento.\nCódigo: " + cod + "\nEmail de compra: " + email + "\nClave: " + (clave || "no la tengo") + "\nFecha de compra: " + fecha + (motivo ? "\nComentario: " + motivo : "");
-  const url = "https://wa.me/5492975012375?text=" + encodeURIComponent(msj);
+  const url = "mailto:[MAIL]?subject=" + encodeURIComponent("Arrepentimiento " + cod) + "&body=" + encodeURIComponent(msj);
   document.getElementById("cod").textContent = cod;
   document.getElementById("wa").href = url;
   document.getElementById("ok").hidden = false;
   document.getElementById("f").hidden = true;
-  window.open(url, "_blank", "noopener");
+  location.href = url;
 });
 </script>
 </body>
