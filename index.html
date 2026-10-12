@@ -1,86 +1,494 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Viaje Justo</title>
+<meta name="description" content="Sabé si el viaje te conviene antes de aceptarlo. Para choferes de Didi, Uber, inDrive y Cabify.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800&family=Kalam:wght@400;700&family=Overpass+Mono:wght@500;700&display=swap">
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-         background: #0f172a; font-family: Arial, Helvetica, sans-serif; padding: 16px; }
-  .card { background: #fff; border-radius: 18px; padding: 32px 28px; max-width: 420px; width: 100%; text-align: center; }
-  .luces span { display: inline-block; width: 18px; height: 18px; border-radius: 50%; margin: 0 3px; }
-  h1 { color: #0f172a; font-size: 22px; margin: 16px 0 8px; }
-  p { color: #475569; font-size: 15px; line-height: 22px; margin: 0; }
-  .ok { color: #16a34a; } .error { color: #dc2626; }
-  form { display: none; margin-top: 20px; text-align: left; }
-  input { width: 100%; font-size: 16px; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 12px; margin-top: 10px; }
-  button { width: 100%; margin-top: 16px; background: #16a34a; color: #fff; border: 0; border-radius: 12px;
-           font-size: 16px; font-weight: bold; padding: 14px; cursor: pointer; }
-  button:disabled { opacity: .6; }
-  #msg { margin-top: 12px; font-size: 14px; }
-</style>
-</head>
-<body>
-  <div class="card">
-    <div class="luces"><span style="background:#22c55e"></span><span style="background:#f59e0b"></span><span style="background:#ef4444"></span></div>
-    <h1 id="titulo">Viaje Justo</h1>
-    <p id="texto">Sabé si el viaje te conviene antes de aceptarlo.</p>
-    <form id="form">
-      <input id="p1" type="password" placeholder="Contraseña nueva" autocomplete="new-password" minlength="6" required>
-      <input id="p2" type="password" placeholder="Repetila" autocomplete="new-password" minlength="6" required>
-      <button id="btn" type="submit">Guardar contraseña</button>
-      <div id="msg"></div>
-    </form>
-  </div>
-<script>
-  // Datos públicos de Supabase (los mismos de gradle.properties). Nunca pongas la secret ni la service_role.
-  var SUPABASE_URL = "https://rbolnjggryonbmtjaceo.supabase.co";
-  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJib2xuamdncnlvbmJtdGphY2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE2NjAyNzIsImV4cCI6MjEwNzIzNjI3Mn0.HgdX5sqIP9e9RYSJNSL7AWsmwqlwrCTQUY8lDrSECqc";
+/* Una página que se lee como alguien hablándote: texto alineado a la izquierda, sin rótulos de diseño,
+   notas a mano en amarillo, la calculadora como prueba real y los planes como carteles de ruta.
+   Look oscuro de la app, elegido a propósito. */
+:root{
+  --fondo:#0C111C; --fondo2:#131A28; --borde:#222C3F; --texto:#E9EDF3; --suave:#A3AEC2; --tenue:#6F7B92;
+  --verde:#22C55E; --ambar:#F59E0B; --rojo:#EF4444; --apagado:#1C2436; --nota:#F7C948;
+  --cartel:#0B6B3A; --cartel2:#0A5C32;
+  --f-texto:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mano:"Kalam", "Comic Sans MS", cursive;
+  --f-num:"Overpass Mono", ui-monospace, Menlo, monospace;
+  --estado:#22C55E;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--fondo);color:var(--texto);font-family:var(--f-texto);font-size:18px;line-height:1.6;padding-inline:20px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin-inline:auto}
+a{color:inherit}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.015em;line-height:1.1;text-wrap:balance}
+h2{font-size:clamp(28px,3.8vw,38px)}
+p{margin:0}
+:focus-visible{outline:3px solid var(--nota);outline-offset:3px}
+.mano{font-family:var(--f-mano);color:var(--nota);font-size:21px;line-height:1.25}
+.chico{font-size:14px;color:var(--suave)}
+.rotulo{font-size:14px;color:var(--suave);font-weight:700}
+.resaltado{background:linear-gradient(transparent 58%, color-mix(in srgb,var(--nota) 40%, transparent) 58%, color-mix(in srgb,var(--nota) 40%, transparent) 92%, transparent 92%);padding-inline:2px}
 
-  // Supabase vuelve con el resultado en el hash (#access_token=...&type=signup) o con #error=...
-  var p = new URLSearchParams((location.hash || "").replace(/^#/, "") || location.search.replace(/^\?/, ""));
-  var t = document.getElementById("titulo"), x = document.getElementById("texto");
-  if (p.get("error") || p.get("error_code")) {
-    t.textContent = "El link no es válido"; t.className = "error";
-    x.textContent = (p.get("error_code") === "otp_expired")
-      ? "El link venció o ya fue usado. Si ya confirmaste, ingresá directamente en la app."
-      : "Probá registrarte de nuevo desde la app.";
-  } else if (p.get("type") === "recovery") {
-    t.textContent = "Elegí tu contraseña nueva";
-    x.textContent = "Mínimo 6 caracteres.";
-    var token = p.get("access_token"), f = document.getElementById("form"), msg = document.getElementById("msg");
-    f.style.display = "block";
-    f.onsubmit = function (e) {
-      e.preventDefault();
-      var a = document.getElementById("p1").value, b = document.getElementById("p2").value;
-      if (a.length < 6) { msg.className = "error"; msg.textContent = "Tiene que tener al menos 6 caracteres"; return; }
-      if (a !== b) { msg.className = "error"; msg.textContent = "Las contraseñas no coinciden"; return; }
-      var btn = document.getElementById("btn"); btn.disabled = true; msg.textContent = "";
-      fetch(SUPABASE_URL + "/auth/v1/user", {
-        method: "PUT",
-        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + token, "Content-Type": "application/json" },
-        body: JSON.stringify({ password: a })
-      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-        .then(function (res) {
-          if (res.ok) {
-            f.style.display = "none"; t.className = "ok"; t.textContent = "¡Contraseña cambiada!";
-            x.textContent = "Ya podés volver a Viaje Justo e ingresar con la contraseña nueva.";
-          } else {
-            btn.disabled = false; msg.className = "error";
-            var m = (res.j.msg || res.j.message || res.j.error_description || "").toLowerCase();
-            msg.textContent = m.indexOf("different") >= 0 ? "Tiene que ser distinta a la anterior"
-              : m.indexOf("expired") >= 0 || m.indexOf("jwt") >= 0 ? "El link venció. Pedí otro desde la app"
-              : "No se pudo cambiar. Probá de nuevo";
-          }
-        }).catch(function () { btn.disabled = false; msg.className = "error"; msg.textContent = "Sin conexión. Probá de nuevo"; });
-    };
-  } else if (p.get("access_token") || p.get("type") === "signup") {
-    t.textContent = "¡Cuenta confirmada!"; t.className = "ok";
-    x.textContent = "Ya podés volver a Viaje Justo e ingresar con tu email y contraseña.";
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font:700 16px/1 var(--f-texto);padding:15px 22px 14px;border-radius:12px;background:var(--texto);color:var(--fondo);border:0;cursor:pointer;transition:transform .15s}
+.pill:hover{transform:translateY(-1px)}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:22px}
+.marca{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;text-decoration:none}
+.mini{display:inline-flex;gap:4px;padding:5px 7px;border-radius:999px;background:#05080F;border:1px solid var(--borde)}
+.mini i{display:block;width:9px;height:9px;border-radius:50%;background:var(--apagado);transition:background .3s, box-shadow .3s}
+[data-luz="rojo"] .l-r{background:var(--rojo);box-shadow:0 0 10px var(--rojo)}
+[data-luz="ambar"] .l-a{background:var(--ambar);box-shadow:0 0 10px var(--ambar)}
+[data-luz="verde"] .l-v{background:var(--verde);box-shadow:0 0 10px var(--verde)}
+.top nav{display:flex;gap:20px;align-items:center}
+.top nav a{text-decoration:none;color:var(--suave);font-weight:500}
+.top nav a:hover{color:var(--texto)}
+.top nav a.pill{color:var(--fondo);padding:11px 16px 10px;font-size:15px}
+
+/* intro */
+.intro{padding-block:40px 30px;max-width:720px}
+.intro h1{font-size:clamp(38px,6vw,62px)}
+.intro h1 span{color:var(--estado);transition:color .3s}
+.intro p{margin-top:20px;font-size:clamp(18px,2vw,20px);color:var(--suave);max-width:36em}
+.intro p b{color:var(--texto);font-weight:700}
+
+/* prueba */
+.prueba{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch;margin-top:26px}
+.prueba > *{min-width:0}
+.nota-flecha{position:absolute;top:-62px;right:4%;display:flex;align-items:flex-end;gap:6px;transform:rotate(-3deg)}
+.nota-flecha svg{width:52px;height:44px;flex:none}
+.form{border:1px solid var(--borde);border-radius:18px;padding:22px;background:var(--fondo2);display:grid;gap:16px;align-content:start}
+.form h3{font-size:19px;font-weight:700}
+.campos{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px}
+.campo{display:grid;gap:5px;min-width:0}
+.campo label{font-size:14px;color:var(--suave)}
+.campo .caja{display:flex;align-items:baseline;gap:6px;border:2px solid var(--borde);border-radius:12px;padding:11px 13px 9px;background:var(--fondo);transition:border-color .2s}
+.campo .caja:focus-within{border-color:var(--texto)}
+.campo input{all:unset;width:100%;min-width:0;font:700 26px/1 var(--f-num);color:var(--texto)}
+.campo span{font:500 14px/1 var(--f-num);color:var(--tenue)}
+.ejemplos{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ejemplos small{color:var(--tenue);font-size:14px;margin-right:2px}
+.ejemplos button{all:unset;cursor:pointer;font:500 14px/1 var(--f-texto);padding:8px 11px 7px;border-radius:8px;background:var(--fondo);border:1px solid var(--borde);color:var(--suave)}
+.ejemplos button:hover{color:var(--texto);border-color:var(--tenue)}
+.ejemplos button:focus-visible{outline:3px solid var(--nota)}
+.supuestos{font-size:14px;color:var(--tenue)}
+
+.pantalla{border-radius:18px;overflow:hidden;min-height:300px;display:grid;align-content:center;padding:26px 20px;
+  background:linear-gradient(90deg,transparent 47%,#C9D2E0 47%,#C9D2E0 53%,transparent 53%) 0 0/96px 96px,
+             linear-gradient(0deg,transparent 47%,#C9D2E0 47%,#C9D2E0 53%,transparent 53%) 0 0/96px 96px,#DDE3EC}
+.burb{--c:var(--estado);border-radius:22px;background:#0C1221;border:4px solid var(--c);padding:16px 18px 14px;color:var(--texto);box-shadow:0 0 0 7px color-mix(in srgb,var(--c) 22%,transparent),0 26px 50px -20px #000}
+.burb .t{display:flex;align-items:center;gap:10px;font-weight:800;font-size:clamp(28px,3.6vw,36px);color:var(--c);line-height:1}
+.burb .t i{width:15px;height:15px;border-radius:50%;background:var(--c);flex:none}
+.burb .t small{margin-left:auto;font:500 13px/1 var(--f-texto);color:var(--suave)}
+.burb .n{margin-top:10px;font:700 clamp(17px,2vw,21px)/1.3 var(--f-num)}
+.burb .s{margin-top:3px;color:var(--suave);font-size:15px}
+.burb .barra{margin-top:12px;height:6px;border-radius:3px;background:#273247;overflow:hidden}
+.burb .barra b{display:block;height:100%;background:var(--c);width:100%;transform-origin:left}
+.burb.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:translateY(-14px) scale(.97);opacity:.4}100%{transform:none;opacity:1}}
+.burb.pop .barra b{animation:barra 15s linear forwards}
+@keyframes barra{to{transform:scaleX(.08)}}
+.pantalla .pie{margin-top:14px;font-size:14px;color:#3B4A63;text-align:center}
+@media (prefers-reduced-motion:reduce){.burb.pop,.burb.pop .barra b{animation:none}}
+
+/* bloques de texto */
+section{padding-block:64px;border-top:1px solid var(--borde)}
+.dos{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+.dos > *{min-width:0}
+.texto p + p{margin-top:16px}
+.texto p{color:var(--suave);max-width:34em}
+.texto p b{color:var(--texto)}
+.firma{margin-top:20px !important}
+.lista{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+.lista li{display:grid;grid-template-columns:22px 1fr;gap:12px}
+.lista li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--verde);margin-top:9px}
+.lista b{display:block;color:var(--texto)}
+.lista span{color:var(--suave);font-size:17px}
+
+.pasos{margin:0;padding:0;list-style:none;display:grid;gap:14px;counter-reset:n}
+.pasos li{counter-increment:n;display:grid;grid-template-columns:40px 1fr;gap:12px;color:var(--suave)}
+.pasos li::before{content:counter(n);width:32px;height:32px;border-radius:50%;border:2px solid var(--texto);display:grid;place-items:center;font-weight:800;color:var(--texto);font-size:16px}
+.pasos b{color:var(--texto)}
+
+/* carteles */
+.cab-planes{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px 24px;margin-bottom:34px}
+.cab-planes p{color:var(--suave);max-width:30em}
+.carteles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch;padding-top:12px}
+.cartel{min-width:0;position:relative;background:var(--cartel);border-radius:16px;padding:9px;box-shadow:0 22px 36px -24px #000}
+.cartel .marco{height:100%;border:3px solid #fff;border-radius:10px;padding:20px 20px 18px;display:flex;flex-direction:column;gap:12px;color:#fff}
+.cartel .dir{display:flex;align-items:center;justify-content:space-between;font:700 14px/1 var(--f-texto);opacity:.9}
+.cartel .dir svg{width:28px;height:28px}
+.cartel h3{font-size:28px;font-weight:800}
+.cartel .monto{font:800 48px/1 var(--f-texto);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cartel .monto small{font-size:17px;font-weight:500;letter-spacing:0;opacity:.85}
+.cartel .eq{font-size:15px;min-height:2.8em;opacity:.92;line-height:1.4}
+.cartel .pill{margin-top:auto;background:#fff;color:var(--cartel2);width:100%}
+.cartel.dest{background:#0A7A42;transform:rotate(-1deg) translateY(-6px)}
+.cartel .chapa{position:absolute;top:-22px;right:14px;font-family:var(--f-mano);color:var(--nota);font-size:20px;transform:rotate(4deg)}
+.nota{margin-top:24px;color:var(--suave);font-size:16px;max-width:60ch}
+
+/* preguntas */
+.faq{display:grid;max-width:760px}
+details{border-top:1px solid var(--borde)}
+details:last-child{border-bottom:1px solid var(--borde)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;padding-block:18px;font-weight:700;font-size:18px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--tenue);font-size:24px;line-height:1;transition:rotate .2s}
+details[open] summary::after{rotate:45deg}
+details p{color:var(--suave);padding-bottom:18px;max-width:60ch}
+
+.final{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px}
+.final h2{max-width:18em}
+.final .pill{background:var(--verde);color:#04230F}
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding-block:24px 40px;color:var(--tenue);font-size:14px;border-top:1px solid var(--borde)}
+
+/* compra */
+dialog{border:1px solid var(--borde);border-radius:20px;background:var(--fondo2);color:var(--texto);padding:0;width:min(460px,calc(100% - 32px))}
+dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
+.caja-compra{padding:24px;display:grid;gap:16px}
+.caja-compra h3{font-size:26px}
+.resumen{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 16px;border-radius:12px;background:var(--cartel);color:#fff;font-weight:700}
+.resumen b{font:800 26px/1 var(--f-texto)}
+.cc label{display:block;font-size:14px;color:var(--suave);margin-bottom:6px}
+.cc input{width:100%;font:500 18px/1.2 var(--f-texto);color:var(--texto);background:var(--fondo);border:2px solid var(--borde);border-radius:12px;padding:13px 14px}
+.cc input:focus{outline:none;border-color:var(--texto)}
+.caja-compra details{border:0}
+.caja-compra summary{padding:0;font-size:15px;color:var(--suave);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.caja-compra summary::after{content:none}
+.caja-compra details[open] summary{margin-bottom:10px}
+.btn-mp{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;width:100%;font:700 17px/1 var(--f-texto);padding:17px 20px 15px;border-radius:12px;background:#009EE3;color:#fff}
+.btn-mp[disabled]{opacity:.6;cursor:wait}
+.btn-mp:focus-visible{outline:3px solid var(--nota);outline-offset:3px}
+.cerrar{all:unset;cursor:pointer;justify-self:center;color:var(--suave);font-size:15px;padding:4px 8px}
+.err{color:var(--rojo);font-size:15px;min-height:1.2em}
+.aviso{margin-top:8px;padding:14px 18px;border-radius:12px;border:1px solid var(--borde);background:var(--fondo2)}
+.aviso.mal{border-color:var(--rojo)}
+.entrega{margin-block:20px 10px;border:2px solid var(--verde);border-radius:20px;padding:26px;background:var(--fondo2);display:grid;gap:16px}
+.entrega h2{font-size:clamp(28px,4vw,40px)}
+.laclave{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.laclave code{font:700 clamp(20px,5.6vw,40px)/1 var(--f-num);white-space:nowrap;letter-spacing:.04em;padding:16px 20px 12px;border-radius:12px;background:var(--fondo);border:2px dashed var(--verde);color:var(--texto);user-select:all;max-width:100%;overflow-x:auto}
+.entrega ol{margin:0;padding-left:22px;display:grid;gap:6px;color:var(--suave)}
+.entrega ol b{color:var(--texto)}
+.cargando{display:inline-block;width:18px;height:18px;border-radius:50%;border:3px solid var(--borde);border-top-color:var(--verde);animation:gira 1s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes gira{to{transform:rotate(360deg)}}
+
+@media (max-width:880px){
+  .prueba,.dos,.carteles{grid-template-columns:1fr}
+  .dos{gap:28px}
+  .cartel.dest{order:-1}
+  .carteles{gap:30px}
+  .top nav a:not(.pill){display:none}
+  .nota-flecha{position:static;transform:rotate(-2deg);margin-bottom:-8px}
+  .nota-flecha svg{transform:rotate(60deg) scaleX(-1)}
+  section{padding-block:52px}
+}
+@media (max-width:560px){
+  .campos{grid-template-columns:1fr 1fr}
+  .campo:first-child{grid-column:1/-1}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <a class="marca" href="#inicio"><span class="mini" data-luz="verde" aria-hidden="true"><i class="l-r"></i><i class="l-a"></i><i class="l-v"></i></span>Viaje Justo</a>
+    <nav>
+      <a href="#que-hace">Qué hace</a>
+      <a href="#planes">Precios</a>
+      <a href="#preguntas">Dudas</a>
+      <a class="pill" href="#planes">Comprar</a>
+    </nav>
+  </header>
+
+  <main id="inicio">
+    <div id="zonaCompra"></div>
+
+    <div class="intro">
+      <h1>¿Te <span>conviene</span> este viaje? Fijate antes de aceptarlo.</h1>
+      <p>Te entra un viaje de $3.500 y tenés 15 segundos para decidir. ¿Cuánto te queda después de la nafta? Viaje Justo hace esa cuenta por vos y te la muestra <b>encima de Didi, Uber, inDrive o Cabify</b>, con un color: verde, amarillo o rojo.</p>
+    </div>
+
+    <div class="prueba">
+      <div class="nota-flecha" aria-hidden="true">
+        <span class="mano">probá con el último<br>viaje que te entró</span>
+        <svg viewBox="0 0 52 44" fill="none" stroke="#F7C948" stroke-width="2.4" stroke-linecap="round"><path d="M4 6c14 2 30 10 38 30"/><path d="M34 32l8 5 3-9"/></svg>
+      </div>
+      <form class="form" id="calc" autocomplete="off">
+        <h3>Hacé la prueba</h3>
+        <div class="campos">
+          <div class="campo"><label for="precio">Te pagan</label><div class="caja"><span>$</span><input id="precio" inputmode="numeric" value="9.000"></div></div>
+          <div class="campo"><label for="km">Distancia</label><div class="caja"><input id="km" inputmode="decimal" value="6,5"><span>km</span></div></div>
+          <div class="campo"><label for="min">Tiempo</label><div class="caja"><input id="min" inputmode="numeric" value="18"><span>min</span></div></div>
+        </div>
+        <div class="ejemplos" aria-label="Ejemplos">
+          <small>O tocá uno:</small>
+          <button type="button" data-ej="9000|6,5|18">$9.000 · 6,5 km</button>
+          <button type="button" data-ej="6000|5,8|20">$6.000 · 5,8 km</button>
+          <button type="button" data-ej="3500|9,8|31">$3.500 · 9,8 km</button>
+        </div>
+        <p class="supuestos">La cuenta usa nafta a $2.141 el litro, un auto que gasta 10 litros cada 100 km, $60 de desgaste por km y metas de $900 por km y $12.000 por hora. En la app ponés tus números.</p>
+      </form>
+
+      <div class="pantalla" aria-live="polite">
+        <div class="burb pop" id="burb">
+          <div class="t"><i></i><span id="veredicto">BUENO</span><small>Viaje Justo</small></div>
+          <div class="n" id="numeros">Neto $7.218 · $1.110/km</div>
+          <div class="s" id="detalle">$24.060 por hora · supera tus metas</div>
+          <div class="barra"><b></b></div>
+        </div>
+        <p class="pie">Esto es lo que te aparece arriba de la app de viajes</p>
+      </div>
+    </div>
+
+    <section id="que-hace" style="margin-top:64px">
+      <div class="dos">
+        <div class="texto">
+          <h2>Por qué existe</h2>
+          <p style="margin-top:18px">Hacer la cuenta de cabeza, manejando y con el reloj corriendo, no da. Entonces uno acepta casi todo lo que entra, y a fin de mes los números no cierran: mucha nafta, muchos km y poca plata.</p>
+          <p>Viaje Justo lee la oferta que te muestra la app, le resta lo que te cuesta hacer ese viaje con <b>tu</b> auto y te dice si llega a lo que vos querés ganar. La decisión sigue siendo tuya, pero ahora la tomás con el número delante.</p>
+          <p class="mano firma">— Fausto, de Viaje Justo</p>
+        </div>
+        <div>
+          <h2 style="font-size:24px;margin-bottom:22px">Lo que trae</h2>
+          <ul class="lista">
+            <li><div><b>La burbuja en vivo</b><span>Aparece sobre la app apenas entra la oferta. No tenés que salir de Didi ni de Uber.</span></div></li>
+            <li><div><b>Tus metas por km y por hora</b><span>Ponés cuánto querés sacar y cada viaje se compara contra eso.</span></div></li>
+            <li><div><b>Las cuentas del día</b><span>Lo que cobraste, lo que gastaste en nafta y cuánto te falta para la meta.</span></div></li>
+            <li><div><b>Una regla para viajes cortos</b><span>Así no te marca en rojo uno chiquito que igual te sirve.</span></div></li>
+            <li><div><b>¿Dónde dejé el auto?</b><span>Guardás dónde estacionaste con un toque.</span></div></li>
+            <li><div><b>Cámara</b><span>Graba en segundo plano mientras manejás, por si pasa algo.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="dos">
+        <h2>Cómo arrancás</h2>
+        <ol class="pasos">
+          <li><div><b>Elegís un plan</b> acá abajo y ponés tu email.</div></li>
+          <li><div><b>Pagás con Mercado Pago.</b> Cuando se aprueba, volvés a esta página y te aparece tu clave con el link para bajar la app.</div></li>
+          <li><div><b>Instalás, ponés la clave</b> y cargás tus metas. En 5 minutos estás manejando con ella.</div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="planes">
+      <div class="cab-planes">
+        <h2>Precios</h2>
+        <p>Con esquivar un viaje malo por semana, ya se pagó sola.</p>
+      </div>
+      <div class="carteles">
+        <div class="cartel">
+          <div class="marco">
+            <div class="dir"><span>1 mes</span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg></div>
+            <h3>Mensual</h3>
+            <div class="monto">$7.000<small> por mes</small></div>
+            <p class="eq">Para probarla un mes y ver si te sirve.</p>
+            <a class="pill" data-plan="mensual" href="#planes">Quiero el mensual</a>
+          </div>
+        </div>
+        <div class="cartel dest">
+          <span class="chapa">el que más sale ↓</span>
+          <div class="marco">
+            <div class="dir"><span>3 meses</span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></div>
+            <h3>Trimestral</h3>
+            <div class="monto">$18.000</div>
+            <p class="eq">Te queda en $6.000 por mes. Ahorrás $3.000.</p>
+            <a class="pill" data-plan="trimestral" href="#planes">Quiero el trimestral</a>
+          </div>
+        </div>
+        <div class="cartel">
+          <div class="marco">
+            <div class="dir"><span>12 meses</span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>
+            <h3>Anual</h3>
+            <div class="monto">$60.000</div>
+            <p class="eq">Te queda en $5.000 por mes. Ahorrás $24.000.</p>
+            <a class="pill" data-plan="anual" href="#planes">Quiero el anual</a>
+          </div>
+        </div>
+      </div>
+      <p class="nota">Los tres planes traen todo y son para un celular. Pagás con tarjeta o dinero en cuenta de Mercado Pago. La clave empieza a contar el día que la activás, no el día que la comprás.</p>
+    </section>
+
+    <section id="preguntas">
+      <h2 style="margin-bottom:22px">Lo que seguro te estás preguntando</h2>
+      <div class="faq">
+        <details><summary>¿Anda en iPhone?</summary><p>Todavía no. Por ahora es solo para Android 8 o más nuevo.</p></details>
+        <details><summary>¿Me acepta los viajes sola?</summary><p>No, y no queremos que lo haga. Solo lee la oferta y te muestra la burbuja. Aceptar o no lo decidís vos, como siempre.</p></details>
+        <details><summary>¿Me va a llenar la galería de capturas?</summary><p>No. Cuando necesita leer la pantalla lo hace en memoria y no guarda nada en el celu.</p></details>
+        <details><summary>¿Hay que rootear el celular?</summary><p>No. Le das dos permisos (accesibilidad y mostrarse arriba de otras apps) y listo.</p></details>
+        <details><summary>¿Puedo usar la clave en dos celulares?</summary><p>Cada clave es para un celu. Si cambiás de teléfono, escribinos y te la pasamos al nuevo.</p></details>
+        <details><summary>¿Cómo renuevo cuando se termina?</summary><p>Elegís un plan, tocás "Ya tengo clave" y la pegás. Los días se suman a la misma clave, sin reinstalar nada.</p></details>
+      </div>
+    </section>
+
+    <section>
+      <div class="final">
+        <h2>Agarrá los viajes que te convienen y dejá pasar el resto.</h2>
+        <a class="pill" href="#planes">Ver precios</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Viaje Justo · hecho en Argentina</span>
+    <span>No tenemos relación con Didi, Uber, inDrive ni Cabify.</span>
+  </footer>
+</div>
+
+<dialog id="compra" aria-labelledby="tituloCompra">
+  <form class="caja-compra" id="formCompra" autocomplete="on">
+    <h3 id="tituloCompra">Tu compra</h3>
+    <div class="resumen"><span id="resPlan">Plan</span><b id="resMonto">$0</b></div>
+    <div class="cc"><label for="email">Tu email</label><input id="email" type="email" required placeholder="nombre@gmail.com" autocomplete="email"></div>
+    <details id="detRenovar"><summary>Ya tengo clave y quiero renovarla</summary>
+      <div class="cc"><label for="renovar">Tu clave actual</label><input id="renovar" placeholder="VJ-XXXX-XXXX-XXXX" autocapitalize="characters" maxlength="24"></div>
+    </details>
+    <p class="err" id="errCompra" role="alert"></p>
+    <button class="btn-mp" id="btnPagar" type="submit">Pagar con Mercado Pago</button>
+    <p class="chico">Te llevamos a Mercado Pago. Cuando se apruebe el pago, volvés acá y ves tu clave.</p>
+    <button class="cerrar" type="button" id="btnCerrar">Cancelar</button>
+  </form>
+</dialog>
+
+<script>
+  // ====== CONFIGURACIÓN ======
+  const FUNCIONES = "https://rbolnjggryonbmtjaceo.supabase.co/functions/v1";   // tu Project URL + /functions/v1
+  const APK_URL   = "";   // link de descarga del APK (ej: GitHub Releases o Google Drive)
+  const WHATSAPP  = "5492975012375";   // soporte, con código de país sin + (ej: 5492974123456)
+  // ============================
+
+  const PLANES = { mensual: ["Plan Mensual", 7000], trimestral: ["Plan Trimestral", 18000], anual: ["Plan Anual", 60000] };
+  const dlg = document.getElementById("compra");
+  let planElegido = "trimestral";
+  const guardar = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+  const leer = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const soporte = txt => WHATSAPP ? ` <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Escribinos por WhatsApp</a>.` : "";
+
+  async function llamar(cuerpo) {
+    const r = await fetch(FUNCIONES + "/tienda", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || "No pudimos conectar con la tienda");
+    return j;
   }
-  // Por seguridad, borramos el token de la barra de direcciones
-  if (location.hash) history.replaceState(null, "", location.pathname);
+
+  document.querySelectorAll("[data-plan]").forEach(a => a.addEventListener("click", e => {
+    e.preventDefault();
+    planElegido = a.dataset.plan;
+    const [nombre, monto] = PLANES[planElegido];
+    document.getElementById("resPlan").textContent = nombre;
+    document.getElementById("resMonto").textContent = "$" + monto.toLocaleString("es-AR");
+    document.getElementById("errCompra").textContent = "";
+    document.getElementById("email").value = leer("vj_email") || "";
+    dlg.showModal();
+    document.getElementById("email").focus();
+  }));
+  document.getElementById("btnCerrar").addEventListener("click", () => dlg.close());
+
+  document.getElementById("formCompra").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = document.getElementById("btnPagar"), err = document.getElementById("errCompra");
+    const email = document.getElementById("email").value.trim();
+    const renovar = document.getElementById("detRenovar").open ? document.getElementById("renovar").value.trim().toUpperCase() : "";
+    if (!/^\S+@\S+\.\S+$/.test(email)) { err.textContent = "Revisá el email."; return; }
+    if (renovar && !/^VJ-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(renovar)) { err.textContent = "La clave tiene el formato VJ-XXXX-XXXX-XXXX."; return; }
+    btn.disabled = true; btn.textContent = "Abriendo Mercado Pago…"; err.textContent = "";
+    try {
+      const r = await llamar({ accion: "crear", plan: planElegido, email, renovar });
+      guardar("vj_email", email);
+      guardar("vj_pedido", r.pedido + "|" + r.token);
+      location.href = r.url;
+    } catch (x) {
+      err.innerHTML = (x.message || "No pudimos conectar con la tienda") + "." + soporte("Hola! Tuve un problema al pagar Viaje Justo");
+      btn.disabled = false; btn.textContent = "Pagar con Mercado Pago";
+    }
+  });
+
+  // ---- vuelta de Mercado Pago ----
+  const zona = document.getElementById("zonaCompra");
+  const qs = new URLSearchParams(location.search);
+  if (qs.get("pago") === "fallido") {
+    zona.innerHTML = `<div class="aviso mal">El pago no se completó y no se te cobró nada. Podés intentar de nuevo eligiendo un plan.</div>`;
+  }
+  let pedido = qs.get("pedido"), tk = qs.get("t");
+  if (!pedido && leer("vj_pedido")) [pedido, tk] = leer("vj_pedido").split("|");
+  if (pedido && tk) esperarClave(pedido, tk, !!qs.get("pedido"));
+
+  async function esperarClave(id, token, recienVuelve) {
+    if (recienVuelve) zona.innerHTML = `<div class="entrega"><p class="rotulo">Tu compra</p><h2><span class="cargando"></span>Confirmando tu pago</h2><p class="chico">Esto tarda unos segundos. No cierres esta página.</p></div>`;
+    for (let i = 0; i < 40; i++) {
+      try {
+        const r = await llamar({ accion: "estado", pedido: id, token });
+        if (r.estado === "pagado") return mostrarClave(r);
+      } catch (x) { if (!recienVuelve) return; }
+      if (!recienVuelve) return;            // compra vieja sin pagar: no insistimos
+      await new Promise(ok => setTimeout(ok, 3000));
+    }
+    zona.innerHTML = `<div class="entrega"><h2>Tu pago todavía no se confirmó</h2><p class="chico">Si ya pagaste, recargá esta página en un rato y va a aparecer tu clave.${soporte("Hola! Pagué Viaje Justo y no me aparece la clave. Pedido " + id)}</p></div>`;
+  }
+
+  function mostrarClave(r) {
+    const vence = r.vence ? new Date(r.vence).toLocaleDateString("es-AR") : null;
+    const plazo = r.renovada ? (vence ? `Renovada hasta el ${vence}.` : `Le sumamos los días a tu clave.`) : `Dura ${r.dias || ""} días desde que la activás.`;
+    zona.innerHTML = `
+      <div class="entrega" id="miClave">
+        <p class="rotulo">${r.renovada ? "Renovación lista" : "Compra aprobada"}</p>
+        <h2>${r.renovada ? "Tu clave quedó renovada" : "Esta es tu clave"}</h2>
+        <div class="laclave"><code id="codClave">${r.clave}</code><button class="pill" type="button" id="btnCopiar">Copiar</button></div>
+        <p class="chico">${plazo} Sacale captura o guardala: la vas a necesitar si cambiás de celular.</p>
+        ${r.renovada ? "<p>No tenés que hacer nada más. La app se actualiza sola la próxima vez que la abras con internet.</p>" : `
+        <ol>
+          <li>${APK_URL ? `<a class="pill" href="${APK_URL}" target="_blank" rel="noopener" style="margin-block:6px">Descargar Viaje Justo</a>` : "<b>Descargá la app</b> desde el link que te pasamos."}</li>
+          <li><b>Instalala.</b> Si el celu te pregunta, permití instalar apps de esta fuente.</li>
+          <li><b>Abrila y pegá tu clave.</b> Después creás tu cuenta y cargás tus metas.</li>
+        </ol>`}
+      </div>`;
+    document.getElementById("btnCopiar").addEventListener("click", e => {
+      const b = e.currentTarget;
+      navigator.clipboard.writeText(r.clave).then(() => { b.textContent = "Copiada"; }).catch(() => {
+        const sel = getSelection(), rg = document.createRange(); rg.selectNodeContents(document.getElementById("codClave")); sel.removeAllRanges(); sel.addRange(rg);
+        b.textContent = "Seleccionada";
+      });
+    });
+    zona.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Misma cuenta que la app (valores por defecto)
+  const NAFTA = 2141, CONSUMO = 10, DESGASTE = 60, META_KM = 900, META_H = 12000, REGULAR = 0.75;
+  const costoKm = NAFTA * CONSUMO / 100 + DESGASTE;
+  const $ = id => document.getElementById(id);
+  const num = s => parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0;
+  const plata = v => (v < 0 ? "-$" : "$") + Math.round(Math.abs(v)).toLocaleString("es-AR");
+  const COLOR = { verde: "#22C55E", ambar: "#F59E0B", rojo: "#EF4444" };
+  let ultimo = "";
+
+  function calcular() {
+    const precio = num($("precio").value), km = num($("km").value), min = num($("min").value);
+    if (!precio || !km || !min) return;
+    const neto = precio - km * costoKm, porKm = neto / km, porH = neto / (min / 60);
+    let luz, txt, det;
+    if (neto <= 0) { luz = "rojo"; txt = "MALO"; det = "Perdés plata con este viaje"; }
+    else if (porKm >= META_KM && porH >= META_H) { luz = "verde"; txt = "BUENO"; det = plata(porH) + " por hora · supera tus metas"; }
+    else if (porKm >= META_KM * REGULAR && porH >= META_H * REGULAR) { luz = "ambar"; txt = "REGULAR"; det = plata(porH) + " por hora · cerca de tu meta"; }
+    else { luz = "rojo"; txt = "MALO"; det = plata(porH) + " por hora · lejos de tu meta"; }
+    $("veredicto").textContent = txt;
+    $("numeros").textContent = "Neto " + plata(neto) + " · " + plata(porKm) + "/km";
+    $("detalle").textContent = det;
+    document.documentElement.style.setProperty("--estado", COLOR[luz]);
+    document.querySelectorAll("[data-luz]").forEach(el => el.dataset.luz = luz);
+    if (luz + txt !== ultimo) { const b = $("burb"); b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); ultimo = luz + txt; }
+  }
+  ["precio", "km", "min"].forEach(id => $(id).addEventListener("input", calcular));
+  $("precio").addEventListener("blur", e => { const v = num(e.target.value); if (v) e.target.value = Math.round(v).toLocaleString("es-AR"); });
+  document.querySelectorAll("[data-ej]").forEach(b => b.addEventListener("click", () => {
+    const [p, k, m] = b.dataset.ej.split("|");
+    $("precio").value = Number(p).toLocaleString("es-AR"); $("km").value = k; $("min").value = m; calcular();
+  }));
+  $("calc").addEventListener("submit", e => e.preventDefault());
+  calcular();
 </script>
-</body>
-</html>
+
+</body></html>
