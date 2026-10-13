@@ -101,6 +101,13 @@ p{margin:0}
 
 /* bloques de texto */
 section{padding-block:64px;border-top:1px solid var(--borde)}
+.bajar{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.bajar > *{min-width:0}
+.caja-bajar{border:1px solid var(--borde);background:var(--fondo2);border-radius:18px;padding:22px;display:grid;gap:18px}
+.btn-bajar{width:100%;background:var(--verde);color:#04230F;font-size:18px;padding:18px 20px 17px}
+.pasos-bajar{margin:0;padding-left:22px;display:grid;gap:8px;color:var(--suave);font-size:16px}
+.pasos-bajar b{color:var(--texto)}
+@media (max-width:880px){.bajar{grid-template-columns:1fr;gap:24px}}
 .dos{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
 .dos > *{min-width:0}
 .texto p + p{margin-top:16px}
@@ -154,7 +161,7 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:cen
 .legales a.arrep{color:var(--texto);font-weight:700}
 .acepto{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--suave);line-height:1.45;cursor:pointer}
 .acepto input{width:20px;height:20px;margin-top:1px;accent-color:#22C55E;flex:none}
-.acepto a{color:var(--texto)}
+.acepto a,.acepto b{color:var(--texto)}
 
 /* compra */
 dialog{border:1px solid var(--borde);border-radius:20px;background:var(--fondo2);color:var(--texto);padding:0;width:min(460px,calc(100% - 32px))}
@@ -208,6 +215,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
     <a class="marca" href="#inicio"><span class="mini" data-luz="verde" aria-hidden="true"><i class="l-r"></i><i class="l-a"></i><i class="l-v"></i></span>Viaje Justo</a>
     <nav>
       <a href="#que-hace">Qué hace</a>
+      <a href="#descargar">Descargar</a>
       <a href="#planes">Precios</a>
       <a href="#preguntas">Dudas</a>
       <a class="pill" href="#planes">Comprar</a>
@@ -287,10 +295,32 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
       </div>
     </section>
 
+    <section id="descargar">
+      <div class="bajar">
+        <div class="texto">
+          <h2>Descargar la app</h2>
+          <p style="margin-top:16px">La podés instalar gratis. Para usarla en tus viajes necesitás una clave.</p>
+          <p class="chico" style="margin-top:14px">Android 8 o superior.</p>
+        </div>
+        <div class="caja-bajar">
+          <a class="pill btn-bajar" href="https://www.mediafire.com/file/sw1hklsuiww0wxi/app-release.apk/file" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+            Descargar ViajeJusto.apk
+          </a>
+          <ol class="pasos-bajar">
+            <li>En MediaFire tocá <b>Download</b>.</li>
+            <li>Abrí <b>ViajeJusto.apk</b> desde tus descargas.</li>
+            <li>Si te lo pide, permití instalar apps de esa fuente.</li>
+            <li>Tocá <b>Instalar</b>.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
     <section id="planes">
       <div class="cab-planes">
         <h2>Precios</h2>
-        <p>Con esquivar un viaje malo por semana, ya se pagó sola.</p>
+        <p>Todos los planes incluyen todas las funciones.</p>
       </div>
       <div class="carteles">
         <div class="cartel">
@@ -326,7 +356,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
     </section>
 
     <section id="preguntas">
-      <h2 style="margin-bottom:22px">Lo que seguro te estás preguntando</h2>
+      <h2 style="margin-bottom:22px">Preguntas frecuentes</h2>
       <div class="faq">
         <details><summary>¿Anda en iPhone?</summary><p>Todavía no. Por ahora es solo para Android 8 o más nuevo.</p></details>
         <details><summary>¿Me acepta los viajes sola?</summary><p>No, y no queremos que lo haga. Solo lee la oferta y te muestra la burbuja. Aceptar o no lo decidís vos, como siempre.</p></details>
@@ -339,8 +369,8 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
 
     <section>
       <div class="final">
-        <h2>Agarrá los viajes que te convienen y dejá pasar el resto.</h2>
-        <a class="pill" href="#planes">Ver precios</a>
+        <h2>Planes desde $7.000 por mes.</h2>
+        <a class="pill" href="#planes">Ver planes</a>
       </div>
     </section>
   </main>
@@ -359,7 +389,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
     <details id="detRenovar"><summary>Ya tengo clave y quiero renovarla</summary>
       <div class="cc"><label for="renovar">Tu clave actual</label><input id="renovar" placeholder="VJ-XXXX-XXXX-XXXX" autocapitalize="characters" maxlength="24"></div>
     </details>
-    <label class="acepto"><input type="checkbox" id="acepto"> <span>Leí y acepto los <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a>.</span></label>
+    <label class="acepto"><input type="checkbox" id="acepto"> <span>Acepto los <a href="terminos.html" target="_blank" rel="noopener">términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">privacidad</a>. Entiendo que la clave se entrega al instante y que <b>una vez activada no tiene devolución</b>.</span></label>
     <p class="err" id="errCompra" role="alert"></p>
     <button class="btn-mp" id="btnPagar" type="submit">Pagar con Mercado Pago</button>
     <p class="chico">Te llevamos a Mercado Pago. Cuando se apruebe el pago, volvés acá y ves tu clave.</p>
@@ -370,7 +400,7 @@ dialog::backdrop{background:rgba(3,6,12,.72);backdrop-filter:blur(3px)}
 <script>
   // ====== CONFIGURACIÓN ======
   const FUNCIONES = "https://rbolnjggryonbmtjaceo.supabase.co/functions/v1";   // tu Project URL + /functions/v1
-  const APK_URL   = "";   // link de descarga del APK (ej: GitHub Releases o Google Drive)
+  const APK_URL   = "https://www.mediafire.com/file/sw1hklsuiww0wxi/app-release.apk/file";   // link de descarga del APK (ej: GitHub Releases o Google Drive)
   const WHATSAPP  = "5492975012375";   // soporte, con código de país sin + (ej: 5492974123456)
   // ============================
 
